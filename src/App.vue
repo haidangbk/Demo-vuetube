@@ -1,17 +1,23 @@
 <template>
   <div id="app">
-    <nav class="navbar" role="navigation" aria-label="main navigation">
+    <nav class="navbar is-transparent">
       <div class="navbar-brand">
         <a class="navbar-item" href="/">VueTube</a>
 
-        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+        <a
+          role="button"
+          class="navbar-burger burger"
+          aria-label="menu"
+          aria-expanded="false"
+          data-target="ShowNavbar"
+        >
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
         </a>
       </div>
 
-      <div class="navbar-menu">
+      <div id="ShowNavbar" class="navbar-menu">
         <div class="navbar-start">
           <router-link to="/" class="navbar-item">Home</router-link>
           <router-link to="/about" class="navbar-item">About</router-link>
@@ -20,25 +26,27 @@
         <div class="navbar-end" v-if="!isAuthenticated">
           <div class="navbar-item">
             <div class="buttons">
-              <a class="button is-primary">
-                <router-link to="/signup">Sign Up</router-link>
-              </a>
-              <a class="button is-light">
-                <router-link to="/login">Log in</router-link>
-              </a>
+              <router-link to="/signup" class="button is-primary">Sign Up</router-link>
+              <router-link to="/login" class="button is-light">Log in</router-link>
             </div>
           </div>
         </div>
+
         <div class="navbar-end" v-else>
           <div class="navbar-item">
             <div class="buttons">
+              <button
+                class="button is-primary"
+                @click="showCategoryForm = !showCategoryForm"
+              >Add Category</button>
               <button class="button is-primary" @click="logOut">Log out</button>
             </div>
           </div>
         </div>
       </div>
     </nav>
-    <div id="nav" class="is-centered breadcrumb has-succeeds-separator">
+
+    <!-- <div id="nav" class="is-centered breadcrumb has-succeeds-separator">
       <ul>
         <li>
           <router-link to="/">Home</router-link>
@@ -53,6 +61,24 @@
           <router-link to="/login">Log In</router-link>
         </li>
       </ul>
+    </div>-->
+    <div class="modal" :class = "{ 'is-active' : showCategoryForm}">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <!-- Any other Bulma elements you want -->
+        <form @submit.prevent="addCategory">
+          <div class="field ">
+            <h2 class="title is-2 has-text-danger">Title Category</h2>
+          </div>
+          <div class="field">
+            <input type="text" class="input" v-model="title">
+          </div>
+          <div class="field">
+            <button class="button is-success">Add</button>
+          </div>
+        </form>
+      </div>
+      <button class="modal-close is-large" aria-label="close" @click="showCategoryForm = !showCategoryForm"></button>
     </div>
     <router-view/>
   </div>
@@ -60,10 +86,13 @@
 
 <script>
 import firebase from "firebase";
+import {db} from './main'
 export default {
   data() {
     return {
-      isAuthenticated: false
+      isAuthenticated: false,
+      showCategoryForm: false,
+      title: ''
     };
   },
   created() {
@@ -81,9 +110,16 @@ export default {
         .signOut()
         .then(() => {
           this.isAuthenticated = false;
-
           this.$router.push("/login");
         });
+    },
+    addCategory(){
+      const category = {
+        title: this.title
+      }
+      db.collection('categories').add(category)
+      this.showCategoryForm = false
+      this.title = ''
     }
   }
 };

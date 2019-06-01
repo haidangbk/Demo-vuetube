@@ -47,6 +47,7 @@ export default {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         this.isAuthenticated = true;
+        this.$router.push('/dashboard');
       }
     });
   },
@@ -56,7 +57,6 @@ export default {
       firebase
         .auth()
         .signInWithEmailAndPassword(this.email, this.password)
-        .then( this.$router.push('/dashboard'))
         .catch(error => alert(error.message));
     },
     logOut() {
